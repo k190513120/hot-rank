@@ -1,13 +1,14 @@
-# 微信读书 → 飞书多维表格边栏插件
+# MySQL → 飞书多维表格边栏插件
 
-该项目是一个飞书多维表格前端边栏插件。用户在插件内扫码登录微信读书后，可将划线与笔记同步到多维表格。
+该项目是一个飞书多维表格前端边栏插件。用户在插件内录入 MySQL 连接信息后，可选择表并同步到多维表格。
 
 ## 功能说明
 
-- 扫码登录：插件向你的同步服务创建会话，展示二维码并轮询登录状态
-- 自动同步：登录成功后触发同步任务，支持同步任务异步轮询
-- 自动建表：若不存在目标表则自动创建，存在则清空并重写
-- 数据映射：将书名、作者、章节、划线、笔记、标签、时间等字段写入飞书多维表格
+- 数据库连接：录入地址、端口、数据库、用户名、密码后连接 MySQL
+- 表选择同步：连接后自动拉取可用数据表，支持多选后批量同步
+- 自动建表写入：自动创建目标多维表格数据表，字段按 MySQL 列结构映射
+- 本地先跑通：默认走本地 Node 同步服务，便于先验证同步链路
+- 云化和支付预留：后续可将 API 切到 Cloudflare，并返回 Stripe 支付链接
 
 ## 本地开发
 
@@ -23,7 +24,7 @@ npm run dev
 npm run build
 ```
 
-后端默认地址是 `http://localhost:8787`。如果你要切换到线上服务，可通过前端环境变量配置：
+后端默认地址是 `http://localhost:8787`。如果你要切换到 Cloudflare Worker，可通过前端环境变量配置：
 
 ```bash
 VITE_SYNC_BASE_URL=https://your-worker.your-subdomain.workers.dev
@@ -150,9 +151,24 @@ REQUIRE_ACTIVE_SUBSCRIPTION = "true"
 
 1. 在多维表格中打开「插件」→「自定义插件」
 2. 填入本地开发地址或部署地址（需 HTTPS）
-3. 在插件里粘贴微信读书 Cookie
-4. 选择“同步记录数量”
+3. 在插件里填写 MySQL 连接信息并点击「连接数据库并加载表」
+4. 勾选要同步的数据表，设置每表同步行数和目标表名前缀
 5. 点击「确认并同步」
+
+## MySQL 同步服务端接口约定
+
+插件默认调用以下接口，你可以按需实现并映射到自己的后端或 Worker：
+
+- `POST /api/mysql/connect`
+  - 请求：`{ host, port, database, username, password }`
+  - 返回：`{ status: 'ok', tables: [{ tableName, estimatedRows }] }`
+- `POST /api/mysql/sync`
+  - 请求：`{ host, port, database, username, password, selectedTables, rowLimit, userId }`
+  - 返回：
+    - 同步成功：`{ status: 'ok', tables: [{ tableName, columns, rows }] }`
+    - 需要支付：`{ status: 'payment_required', checkoutUrl, message }`
+
+前端会把 `status=payment_required` 作为 Stripe 结算跳转入口处理。
 
 ## 同步服务端接口约定
 
@@ -241,6 +257,10 @@ Provider 返回字段兼容：
 - `WEREAD_COOKIE`：可选，直接提供微信读书 Cookie
 - `WEREAD_UPSTREAM_API`：可选，上游微信读书聚合接口，返回 `highlights` 数组
 - `WEREAD_SAMPLE_FILE`：可选，本地示例数据文件路径
+- `MYSQL_DEFAULT_ROW_LIMIT`：可选，MySQL 每张表默认拉取行数，默认 `500`
+- `MYSQL_MAX_ROW_LIMIT`：可选，MySQL 每张表允许的最大行数，默认 `5000`
+- `MYSQL_SYNC_REQUIRE_PAYMENT`：可选，是否强制支付后才允许同步，默认 `false`
+- `STRIPE_MYSQL_CHECKOUT_URL`：可选，当返回 `payment_required` 时给前端的结算地址
 
 Cookie 取值优先级：会话内 Cookie（扫码/Provider） > CookieCloud > `WEREAD_COOKIE`。
 若设置了 Cookie 且 `WEREAD_STRICT_REAL_DATA=true`，则不会再悄悄回退示例数据，抓取失败会直接报错提示。

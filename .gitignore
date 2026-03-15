@@ -9,9 +9,13 @@
 /coverage
 package.lock.json
 pnpm-lock.yaml
+
 # production
 /build
 
+# runtime data (scheduler)
+server/sync-jobs.json
+server/sync-state.json
 
 # misc
 .DS_Store

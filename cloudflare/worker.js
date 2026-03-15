@@ -630,9 +630,10 @@ async function fetchNotebooks(wereadCookie, maxBooksLimit) {
 }
 
 async function fetchHighlightsByWereadCookie(wereadCookie, maxRecords, maxBooksLimit) {
-  if (!wereadCookie) return [];
+  if (!wereadCookie) return { highlights: [], books: [] };
   const books = await fetchNotebooks(wereadCookie, maxBooksLimit);
   const highlights = [];
+  const booksMeta = [];
   for (const item of books) {
     if (highlights.length >= maxRecords) break;
     const book = item?.book || {};
@@ -642,6 +643,7 @@ async function fetchHighlightsByWereadCookie(wereadCookie, maxRecords, maxBooksL
     const bookTitle = String(book?.title || '');
     const author = String(book?.author || '');
     const tags = asArray(book?.categories).map((x) => String(x?.title || '')).filter(Boolean).join('、');
+    booksMeta.push(item);
 
     let chapterMap = {};
     try {
@@ -672,7 +674,10 @@ async function fetchHighlightsByWereadCookie(wereadCookie, maxRecords, maxBooksL
       }
     } catch (_) {}
   }
-  return highlights.slice(0, maxRecords);
+  return {
+    highlights: highlights.slice(0, maxRecords),
+    books: booksMeta
+  };
 }
 
 async function resolveCookie(body, env) {
@@ -721,7 +726,9 @@ async function handleSync(req, env) {
   }
 
   try {
-    const highlights = await fetchHighlightsByWereadCookie(wereadCookie, maxRecords, maxBooks);
+    const syncPayload = await fetchHighlightsByWereadCookie(wereadCookie, maxRecords, maxBooks);
+    const highlights = asArray(syncPayload?.highlights);
+    const books = asArray(syncPayload?.books);
     if (!highlights.length && strictRealData) {
       return jsonResponse(req, env, 500, { status: 'failed', message: '真实数据抓取结果为空，请检查 Cookie 是否有效' });
     }
@@ -729,7 +736,7 @@ async function handleSync(req, env) {
       const usedRecords = (permission.usedRecords || 0) + highlights.length;
       await setUsageByUserId(env, permission.userId, usedRecords);
     }
-    return jsonResponse(req, env, 200, { status: 'completed', highlights });
+    return jsonResponse(req, env, 200, { status: 'completed', highlights, books });
   } catch (error) {
     return jsonResponse(req, env, 500, { status: 'failed', message: `真实数据抓取失败：${error?.message || 'unknown error'}` });
   }

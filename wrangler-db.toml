@@ -1,0 +1,10 @@
+name = "db-sync-service"
+main = "cloudflare/db-worker.js"
+compatibility_date = "2026-03-11"
+
+[vars]
+STRIPE_PRODUCT_NAME = "数据库同步飞书多维表格"
+
+[[kv_namespaces]]
+binding = "DB_STATE"
+id = "d5cdde5310614ee6a31e794785470caa"
