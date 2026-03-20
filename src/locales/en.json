@@ -117,6 +117,20 @@
   "msg.userIdError": "Unable to get user info. Please open this plugin inside Feishu Bitable.",
   "msg.quotaInsufficientGeneric": "Quota insufficient. Please pay first.",
 
+  "alipay.title": "Alipay Scan to Pay",
+  "alipay.planName": "Database Sync · Annual Plan",
+  "alipay.duration": "Duration: 1 Year",
+  "alipay.period": "{start} to {end}",
+  "alipay.generating": "Generating QR code...",
+  "alipay.scanToPay": "Scan the QR code with Alipay to pay",
+  "alipay.footerNote": "Effective immediately after payment, valid for one year",
+  "alipay.paySuccess": "Payment successful! Valid until {expiry}",
+  "alipay.timeout": "Payment timed out. Please close and try again.",
+  "alipay.tradeClosed": "Transaction closed",
+
+  "renewal.expiringSoon": "Your plan expires in {days} days ({date}). Please renew.",
+  "renewal.expired": "Your plan expired on {date}. Please renew to continue.",
+
   "validate.mongoUri": "Please enter MongoDB URI",
   "validate.dbHost": "Please enter database host",
   "validate.dbName": "Please enter database name",

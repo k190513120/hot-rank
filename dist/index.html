@@ -7,8 +7,8 @@
   <title data-i18n="card.title">数据库同步插件</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="./assets/index.6ed40479.js"></script>
-  <link rel="stylesheet" href="./assets/index.97bd55b6.css">
+  <script type="module" crossorigin src="./assets/index.be2ee36c.js"></script>
+  <link rel="stylesheet" href="./assets/index.bed70d2b.css">
 </head>
 <body>
   <main class="main">
@@ -279,6 +279,13 @@
     <footer class="footer-info" data-i18n="footer.copyright">&copy; 2026 数据库同步工具</footer>
   </main>
 
+  <!-- Renewal Reminder Banner -->
+  <div id="renewalBanner" class="renewal-banner" style="display: none;">
+    <i class="fas fa-clock"></i>
+    <span id="renewalBannerText"></span>
+    <button id="renewalBannerBtn" class="renewal-banner-btn" data-i18n="paywall.upgradeBtn">升级会员</button>
+  </div>
+
   <!-- Alipay QR Code Modal -->
   <div id="alipayModal" class="alipay-modal" style="display: none;">
     <div class="alipay-modal-backdrop"></div>
@@ -286,16 +293,24 @@
       <button id="alipayModalClose" class="alipay-modal-close"><i class="fas fa-times"></i></button>
       <div class="alipay-modal-header">
         <img src="https://gw.alipayobjects.com/mdn/rms_ce4c6f/afts/img/A*WQ6fQYZfuUAAAAAAAAAAAAAAARQnAQ" alt="Alipay" class="alipay-logo" />
-        <div class="alipay-modal-title">支付宝扫码支付</div>
+        <div class="alipay-modal-title" data-i18n="alipay.title">支付宝扫码支付</div>
+      </div>
+      <div class="alipay-plan-info">
+        <div class="alipay-plan-name" data-i18n="alipay.planName">数据库同步 · 年度会员</div>
+        <div class="alipay-plan-detail">
+          <span class="alipay-plan-duration"><i class="fas fa-calendar"></i> <span data-i18n="alipay.duration">订阅时长：1 年</span></span>
+          <span class="alipay-plan-period" id="alipayPlanPeriod"></span>
+        </div>
       </div>
       <div class="alipay-qr-container">
         <div id="alipayQrCode" class="alipay-qr-code"></div>
         <div id="alipayQrLoading" class="alipay-qr-loading">
-          <i class="fas fa-spinner fa-spin"></i> 正在生成二维码...
+          <i class="fas fa-spinner fa-spin"></i> <span data-i18n="alipay.generating">正在生成二维码...</span>
         </div>
       </div>
       <div id="alipayAmount" class="alipay-amount"></div>
-      <div id="alipayStatus" class="alipay-status">请使用支付宝扫描二维码完成支付</div>
+      <div id="alipayStatus" class="alipay-status" data-i18n="alipay.scanToPay">请使用支付宝扫描二维码完成支付</div>
+      <div class="alipay-footer-note" data-i18n="alipay.footerNote">支付后立即生效，有效期至次年同日</div>
     </div>
   </div>
 

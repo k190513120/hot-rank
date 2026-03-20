@@ -19,7 +19,8 @@ import {
   runScheduledJob,
   ScheduledJob,
   createAlipayOrder,
-  queryAlipayOrder
+  queryAlipayOrder,
+  getEntitlement
 } from './db-api';
 import { syncTableToBitable } from './db-table-operations';
 
@@ -66,6 +67,7 @@ async function initializeApp() {
   setDefaultConfig();
   bindEvents();
   await checkPaywallStatus();
+  await checkRenewalStatus();
   await fetchBitableAppToken();
   loadJobList();
 }
@@ -95,6 +97,36 @@ async function checkPaywallStatus() {
   }
 }
 
+function formatDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+const RENEWAL_WARN_DAYS = 7;
+
+async function checkRenewalStatus() {
+  if (!API_BASE_URL || !userIsPaid) return;
+  try {
+    const userId = await getCurrentUserId();
+    const resp = await getEntitlement(API_BASE_URL, userId);
+    const expiresAt = resp.entitlement?.expiresAt;
+    if (!expiresAt || expiresAt <= 0) return;
+
+    const now = Date.now();
+    const daysLeft = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
+    const expiryDate = formatDate(new Date(expiresAt));
+
+    if (daysLeft <= 0) {
+      // Already expired
+      $('#renewalBannerText').text(t('renewal.expired', { date: expiryDate }));
+      $('#renewalBanner').show().addClass('renewal-expired');
+    } else if (daysLeft <= RENEWAL_WARN_DAYS) {
+      // Expiring soon
+      $('#renewalBannerText').text(t('renewal.expiringSoon', { days: daysLeft, date: expiryDate }));
+      $('#renewalBanner').show().addClass('renewal-warning');
+    }
+  } catch (_) {}
+}
+
 function setDefaultConfig() {
   $('#dbHost').val('127.0.0.1');
   $('#dbPort').val('3306');
@@ -113,6 +145,8 @@ function bindEvents() {
   // Alipay modal
   $('#alipayModalClose').on('click', closeAlipayModal);
   $('.alipay-modal-backdrop').on('click', closeAlipayModal);
+  // Renewal banner
+  $('#renewalBannerBtn').on('click', handlePaywallUpgrade);
 }
 
 async function handlePaywallUpgrade() {
@@ -636,24 +670,31 @@ async function openAlipayPayment(userId: string) {
   const $loading = $('#alipayQrLoading');
   const $status = $('#alipayStatus');
   const $amount = $('#alipayAmount');
+  const $period = $('#alipayPlanPeriod');
 
   $modal.show();
   $qrCode.empty();
   $loading.show();
-  $status.text('正在生成二维码...');
+  $status.text(t('alipay.generating'));
   $amount.text('');
+
+  // Calculate and display subscription period
+  const startDate = new Date();
+  const endDate = new Date(startDate);
+  endDate.setFullYear(endDate.getFullYear() + 1);
+  $period.html(`<i class="fas fa-clock"></i> ${t('alipay.period', { start: formatDate(startDate), end: formatDate(endDate) })}`);
 
   try {
     const order = await createAlipayOrder(API_BASE_URL, userId);
     $loading.hide();
-    $amount.text(`¥${order.totalAmount}`);
-    $status.text('请使用支付宝扫描二维码完成支付');
+    $amount.html(`<span class="alipay-amount-value">¥${order.totalAmount}</span><span class="alipay-amount-unit"> / ${t('alipay.duration')}</span>`);
+    $status.text(t('alipay.scanToPay'));
 
-    // Generate QR code using a canvas-based approach (no external library)
+    // Generate QR code
     renderQrCode($qrCode[0], order.qrCode);
 
     // Start polling for payment status
-    startAlipayPolling(order.outTradeNo);
+    startAlipayPolling(order.outTradeNo, formatDate(endDate));
   } catch (error) {
     $loading.hide();
     $status.text(t('msg.paymentFailed'));
@@ -672,7 +713,7 @@ function renderQrCode(container: HTMLElement, url: string) {
   container.appendChild(img);
 }
 
-function startAlipayPolling(outTradeNo: string) {
+function startAlipayPolling(outTradeNo: string, expiryDate: string) {
   stopAlipayPolling();
   let attempts = 0;
   const maxAttempts = 120; // 2 minutes at 1s interval
@@ -681,20 +722,21 @@ function startAlipayPolling(outTradeNo: string) {
     attempts++;
     if (attempts > maxAttempts) {
       stopAlipayPolling();
-      $('#alipayStatus').text('支付超时，请关闭后重试');
+      $('#alipayStatus').text(t('alipay.timeout'));
       return;
     }
     try {
       const result = await queryAlipayOrder(API_BASE_URL, outTradeNo);
       if (result.tradeStatus === 'TRADE_SUCCESS') {
         stopAlipayPolling();
-        $('#alipayStatus').text('支付成功！').addClass('alipay-status-success');
+        $('#alipayStatus').text(t('alipay.paySuccess', { expiry: expiryDate })).addClass('alipay-status-success');
         userIsPaid = true;
         $('#scheduledPaywall').hide();
-        setTimeout(() => closeAlipayModal(), 1500);
+        $('#renewalBanner').hide();
+        setTimeout(() => closeAlipayModal(), 2000);
       } else if (result.tradeStatus === 'TRADE_CLOSED') {
         stopAlipayPolling();
-        $('#alipayStatus').text('交易已关闭');
+        $('#alipayStatus').text(t('alipay.tradeClosed'));
       }
     } catch (_) {
       // Ignore polling errors, will retry

@@ -117,6 +117,20 @@
   "msg.userIdError": "ユーザー情報を取得できません。Feishuマルチテーブル内でプラグインを開いてください。",
   "msg.quotaInsufficientGeneric": "枠が不足しています。先にお支払いください。",
 
+  "alipay.title": "Alipay QRコード決済",
+  "alipay.planName": "データベース同期 · 年間プラン",
+  "alipay.duration": "期間：1年間",
+  "alipay.period": "{start} ～ {end}",
+  "alipay.generating": "QRコード生成中...",
+  "alipay.scanToPay": "AlipayでQRコードをスキャンしてお支払いください",
+  "alipay.footerNote": "お支払い後すぐに有効、1年間有効",
+  "alipay.paySuccess": "支払い成功！有効期限：{expiry}",
+  "alipay.timeout": "支払いがタイムアウトしました。閉じてもう一度お試しください。",
+  "alipay.tradeClosed": "取引が閉じられました",
+
+  "renewal.expiringSoon": "プランの有効期限があと{days}日です（{date}）。更新してください。",
+  "renewal.expired": "プランは{date}に期限切れです。更新してください。",
+
   "validate.mongoUri": "MongoDB URIを入力してください",
   "validate.dbHost": "データベースホストを入力してください",
   "validate.dbName": "データベース名を入力してください",

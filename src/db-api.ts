@@ -146,6 +146,23 @@ export async function updateDbUsage(cfBaseUrl: string, userId: string, count: nu
   );
 }
 
+export interface EntitlementResponse {
+  status: string;
+  entitlement: {
+    active: boolean;
+    userId: string;
+    email: string;
+    expiresAt: number;
+  };
+}
+
+export async function getEntitlement(cfBaseUrl: string, userId: string): Promise<EntitlementResponse> {
+  return requestJson<EntitlementResponse>(
+    `${cfBaseUrl}/api/stripe/entitlement?userId=${encodeURIComponent(userId)}`,
+    { method: 'GET' }
+  );
+}
+
 export async function createDbCheckoutSession(cfBaseUrl: string, userId: string): Promise<{ url: string }> {
   const result = await requestJson<{ status: string; url: string }>(
     `${cfBaseUrl}/api/stripe/create-checkout-session`,

@@ -809,6 +809,42 @@ textarea.config-input {
   color: #e8eefb;
 }
 
+.alipay-plan-info {
+  background: rgba(255, 109, 31, 0.08);
+  border: 1px solid rgba(255, 109, 31, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+}
+
+.alipay-plan-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e8eefb;
+  margin-bottom: 6px;
+}
+
+.alipay-plan-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alipay-plan-duration,
+.alipay-plan-period {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+
+  i {
+    color: #ff944f;
+    font-size: 11px;
+  }
+}
+
 .alipay-qr-container {
   display: flex;
   justify-content: center;
@@ -835,10 +871,23 @@ textarea.config-input {
 }
 
 .alipay-amount {
-  font-size: 28px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+
+.alipay-amount-value {
+  font-size: 32px;
   font-weight: 700;
   color: #ff6d1f;
-  margin-bottom: 8px;
+}
+
+.alipay-amount-unit {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 400;
 }
 
 .alipay-status {
@@ -849,6 +898,71 @@ textarea.config-input {
 .alipay-status-success {
   color: var(--ok) !important;
   font-weight: 600;
+}
+
+.alipay-footer-note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: #7f89a0;
+}
+
+/* Renewal Banner */
+.renewal-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+
+  i {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+}
+
+.renewal-warning {
+  background: linear-gradient(90deg, rgba(255, 179, 71, 0.15), rgba(255, 140, 0, 0.15));
+  border-bottom: 1px solid rgba(255, 179, 71, 0.3);
+  color: #ffb347;
+
+  i {
+    color: #ffb347;
+  }
+}
+
+.renewal-expired {
+  background: linear-gradient(90deg, rgba(255, 95, 109, 0.15), rgba(255, 60, 80, 0.15));
+  border-bottom: 1px solid rgba(255, 95, 109, 0.3);
+  color: #ff7f8a;
+
+  i {
+    color: #ff5f6d;
+  }
+}
+
+.renewal-banner-btn {
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(180deg, #458eff, #2d73ec);
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.9;
+  }
 }
 
 @keyframes spin {

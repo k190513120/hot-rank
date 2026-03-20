@@ -117,6 +117,20 @@
   "msg.userIdError": "无法获取当前登录用户信息，请在多维表格内打开插件后重试",
   "msg.quotaInsufficientGeneric": "额度不足，请先支付",
 
+  "alipay.title": "支付宝扫码支付",
+  "alipay.planName": "数据库同步 · 年度会员",
+  "alipay.duration": "订阅时长：1 年",
+  "alipay.period": "{start} 至 {end}",
+  "alipay.generating": "正在生成二维码...",
+  "alipay.scanToPay": "请使用支付宝扫描二维码完成支付",
+  "alipay.footerNote": "支付后立即生效，有效期至次年同日",
+  "alipay.paySuccess": "支付成功！会员有效期至 {expiry}",
+  "alipay.timeout": "支付超时，请关闭后重试",
+  "alipay.tradeClosed": "交易已关闭",
+
+  "renewal.expiringSoon": "您的会员将在 {days} 天后到期（{date}），请及时续费",
+  "renewal.expired": "您的会员已于 {date} 到期，请续费以继续使用",
+
   "validate.mongoUri": "请输入 MongoDB URI",
   "validate.dbHost": "请输入数据库地址",
   "validate.dbName": "请输入数据库名",
