@@ -1,4 +1,25 @@
-import { MongoClient } from 'mongodb';
+/**
+ * MongoDB driver for Cloudflare Workers.
+ *
+ * The official `mongodb` npm driver uses eval()/new Function() internally
+ * which is blocked in Cloudflare Workers V8 sandbox. This module attempts
+ * to use it but provides a clear error message if it fails.
+ *
+ * For production MongoDB on Cloudflare Workers, consider:
+ *   - MongoDB Atlas Data API (HTTP-based, no TCP needed)
+ *   - A proxy service that bridges HTTP to MongoDB wire protocol
+ */
+
+let MongoClient;
+let mongoAvailable = false;
+
+try {
+  const mod = await import('mongodb');
+  MongoClient = mod.MongoClient;
+  mongoAvailable = true;
+} catch (_) {
+  mongoAvailable = false;
+}
 
 function serializeValue(value) {
   if (value === null || value === undefined) return null;
@@ -16,13 +37,32 @@ function serializeValue(value) {
 }
 
 async function withClient(config, fn) {
+  if (!mongoAvailable || !MongoClient) {
+    throw new Error(
+      'MongoDB 驱动在 Cloudflare Workers 中不可用（eval() 被禁止）。' +
+      '请使用 MongoDB Atlas Data API 或通过代理服务连接。' +
+      '\nMongoDB driver is not available in Cloudflare Workers (eval() is blocked). ' +
+      'Please use MongoDB Atlas Data API or connect via a proxy service.'
+    );
+  }
   const uri = config.uri || `mongodb://${config.username}:${encodeURIComponent(config.password)}@${config.host}:${config.port}/${config.database}`;
   const client = new MongoClient(uri, { connectTimeoutMS: 10000, serverSelectionTimeoutMS: 10000 });
-  await client.connect();
   try {
+    await client.connect();
     return await fn(client);
+  } catch (error) {
+    const msg = String(error?.message || '');
+    if (msg.includes('Code generation from strings') || msg.includes('eval') || msg.includes('Function')) {
+      throw new Error(
+        'MongoDB 驱动不兼容 Cloudflare Workers（内部使用了被禁止的 eval/new Function）。' +
+        '请使用 MongoDB Atlas Data API 或代理服务。' +
+        '\nMongoDB driver is incompatible with Cloudflare Workers (uses eval/new Function internally). ' +
+        'Please use MongoDB Atlas Data API or a proxy service.'
+      );
+    }
+    throw error;
   } finally {
-    await client.close();
+    try { await client.close(); } catch (_) {}
   }
 }
 
