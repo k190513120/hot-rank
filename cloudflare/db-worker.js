@@ -511,7 +511,7 @@ async function handleStripeWebhook(req, env) {
 
     if (type === 'checkout.session.completed') {
       const eventProduct = String(object?.metadata?.product_name || '').trim();
-      if (eventProduct && eventProduct !== expectedProduct) {
+      if (eventProduct !== expectedProduct) {
         return jsonResponse(req, env, 200, { received: true, skipped: true, reason: 'product_mismatch' });
       }
       const email = String(object?.customer_details?.email || object?.customer_email || object?.metadata?.customer_email || '').trim();
@@ -519,7 +519,7 @@ async function handleStripeWebhook(req, env) {
       const customerId = String(object?.customer || '').trim();
       const mode = String(object?.mode || '');
       if (customerId && (email || userId)) {
-        await putState(env, `db:customer:${customerId}`, { email, userId, updatedAt: Date.now() });
+        await putState(env, `db:customer:${customerId}`, { email, userId, productName: expectedProduct, updatedAt: Date.now() });
       }
       const expiresAt = mode === 'subscription' ? 0 : Date.now() + YEAR_SECONDS * 1000;
       await markEntitlementActive(env, { email, userId }, 'checkout.session.completed', expiresAt);
@@ -527,8 +527,8 @@ async function handleStripeWebhook(req, env) {
     if (type === 'customer.subscription.updated' || type === 'customer.subscription.created') {
       const customerId = String(object?.customer || '').trim();
       const customerState = customerId ? await getState(env, `db:customer:${customerId}`) : null;
-      if (!customerState) {
-        return jsonResponse(req, env, 200, { received: true, skipped: true, reason: 'unknown_customer' });
+      if (!customerState || customerState.productName !== expectedProduct) {
+        return jsonResponse(req, env, 200, { received: true, skipped: true, reason: customerState ? 'product_mismatch' : 'unknown_customer' });
       }
       const status = String(object?.status || '');
       const email = String(customerState.email || '').trim();
@@ -544,8 +544,8 @@ async function handleStripeWebhook(req, env) {
     if (type === 'customer.subscription.deleted') {
       const customerId = String(object?.customer || '').trim();
       const customerState = customerId ? await getState(env, `db:customer:${customerId}`) : null;
-      if (!customerState) {
-        return jsonResponse(req, env, 200, { received: true, skipped: true, reason: 'unknown_customer' });
+      if (!customerState || customerState.productName !== expectedProduct) {
+        return jsonResponse(req, env, 200, { received: true, skipped: true, reason: customerState ? 'product_mismatch' : 'unknown_customer' });
       }
       const email = String(customerState.email || '').trim();
       const userId = String(customerState.userId || '').trim();
