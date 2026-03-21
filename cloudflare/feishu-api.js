@@ -1,12 +1,15 @@
 /**
- * Feishu Bitable API - 使用多维表格授权码（Personal Access Token）访问
+ * Feishu Bitable API - 使用多维表格授权码（PersonalBaseToken）访问
+ *
+ * 重要：PersonalBaseToken 必须使用 base-api.feishu.cn 域名，
+ *       而不是 open.feishu.cn（那是飞书开放平台 OAuth token 用的）。
  * 文档: https://open.feishu.cn/document/server-docs/docs/bitable-v1
  */
 
-const FEISHU_API_BASE = 'https://open.feishu.cn/open-apis';
+const FEISHU_BASE_API = 'https://base-api.feishu.cn/open-apis';
 
 async function request(method, path, token, body) {
-  const url = `${FEISHU_API_BASE}${path}`;
+  const url = `${FEISHU_BASE_API}${path}`;
   const headers = {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json'
