@@ -11,7 +11,7 @@ routes = [
 crons = ["* * * * *"]
 
 [vars]
-STRIPE_PRODUCT_NAME = "数据库同步飞书多维表格"
+STRIPE_PRODUCT_NAME = "数据库同步"
 SOCKS5_PROXY_URL = "socks5://165.154.200.47:1080"
 
 [[kv_namespaces]]
