@@ -756,7 +756,7 @@ function getAlipayConfig(env) {
     alipayPublicKey: String(env.ALIPAY_PUBLIC_KEY || '').trim(),
     gateway: String(env.ALIPAY_GATEWAY || 'https://openapi.alipay.com/gateway.do').trim(),
     productName: String(env.ALIPAY_PRODUCT_NAME || '数据库同步飞书多维表格').trim(),
-    totalAmount: String(env.ALIPAY_TOTAL_AMOUNT || '4000.00').trim(),
+    totalAmount: String(env.ALIPAY_TOTAL_AMOUNT || '2000.00').trim(),
     notifyUrl: String(env.ALIPAY_NOTIFY_URL || '').trim()
   };
 }
